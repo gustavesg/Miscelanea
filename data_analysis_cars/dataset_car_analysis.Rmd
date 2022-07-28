@@ -1,0 +1,82 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+In this project, we will available a database of cars get in kaggle available in follow link:https://www.kaggle.com/datasets/gagandeep16/car-sales. The database has a lot informations as manufacturer, sales, vehicle type and others. Our mission is extract relevant informations by graphs, and tables using the software R.
+
+First, we will verify wichs brands has most/less sales in this period. The analysis show us that the Ford has done more sales in this period, whereas Porsche has done less in the same period. This has done by the code below.
+
+```{r}
+library(dplyr)
+#import the base
+dados <- read.csv('Car_sales.csv')
+#agroup the sale by brands
+dados_agrupados = dados %>% group_by(Manufacturer) %>% 
+summarise(total_Sales = sum(Sales_in_thousands))
+#get the brand that sales max
+dados_agrupados$Manufacturer[which.max(dados_agrupados$total_Sales)]
+#get the brand that sales min
+dados_agrupados$Manufacturer[which.min(dados_agrupados$total_Sales)]
+
+```
+
+Now, we will analyze only passenger cars. We will verify which car is the the most/less expensive in this database. The analysis show us that the model CL500 of Mercedes Benz has the most expensive car, where as the model Metro of Chevrolet has the least expensive car. This has done by code below.
+
+```{r}
+#date cars of type passenger
+dados_passenger = dados[dados$Vehicle_type == "Passenger",]
+#get brand and model of the car with most value
+dados_passenger[which.max(dados_passenger$Price_in_thousands),1:2]
+#get brand and model of the car with less value
+dados_passenger[which.min(dados_passenger$Price_in_thousands),1:2]
+
+
+```
+
+Even though Porsche and Ford not appear in the unless/most expensive cars, we suspect that exists any relation between sales and pricing of the car. For check this, we will generate a scatter graph sales versus price. We perceptive that in general cars with lowest price has more sales that cars with biggest price. This has done by code below.
+
+```{r}
+attach(dados)
+plot(Price_in_thousands,Sales_in_thousands,pch = 20)
+```
+
+Now, our mission is get a dotted graph of the mean of the horsepower by brand. The analysis show us that Porsche and Lincon are the brands that has biggest mean horse power, whereas Saturn and Volksvagen are the brands that has a lowest mean horse power. We got this table by the code below.
+
+```{r}
+df_horse_brand = dados %>% group_by(Manufacturer) %>% 
+summarise(mean_horse = mean(Horsepower))
+
+attach(df_horse_brand)
+
+#graph dotchart
+dotchart(mean_horse, labels = Manufacturer, cex = 0.55,
+main = 'Mean of HorsePower by brand', xlab = 'HP')
+
+```
+
+Now, we will inspect if exists any relation between horsepower and fuel efficiency. We will generate a graph contemplating all cars about this two aspects and the regression line about this points. The results show us that in general cars with more fuel efficiency has a loss horsepower.
+
+```{r}
+attach(dados)
+plot(Fuel_efficiency,Horsepower,pch = 20)
+abline(372.464,-7.926)
+```
+
+Now, we will investigate the relation between engine size and horsepower, we hope that relation is proportional. In fact, we can perceptive in the graph that how bigger engine size, bigger horsepower, that is make sense.
+
+```{r}
+attach(dados)
+plot(Engine_size,Horsepower,pch = 20)
+abline(lm(Horsepower ~ Engine_size),col = 'red')
+```
+
+Finally, we will find the top 5 cars in power performance fator.
+
+```{r}
+dados_power = dados %>% arrange(desc(Power_perf_factor))
+dados_power[1:5,1:2]
+```
+
